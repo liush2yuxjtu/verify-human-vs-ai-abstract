@@ -1,0 +1,321 @@
+{
+  "metadata": {
+    "skill_name": "verify-human-vs-ai-abstract",
+    "skill_path": "/home/box/agent-data/workflows/verify-human-vs-ai-abstract",
+    "executor_model": "grok-bot-executor",
+    "analyzer_model": "grok-bot-executor",
+    "timestamp": "2026-10-27T03:39:27Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 45.0,
+        "tokens": 4100,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Does not declare human writing better overall",
+          "passed": true,
+          "evidence": "writing_better = FAIL；结论「不要宣布人写摘要整体更好」"
+        },
+        {
+          "text": "FAIL or strong risk on human Claim honesty / 'first' / 'beats all'",
+          "passed": true,
+          "evidence": "声明诚实 = 1 FAIL；“first” 与 Hopfield 1989 冲突；“50% everywhere” 不可核验"
+        },
+        {
+          "text": "Credits AI abstract for scoped claims and concrete metric",
+          "passed": true,
+          "evidence": "赞 A 有 SortNet、timsort 基线、1.2%/30% 具体取舍、否认渐近新颖；诚实=5"
+        },
+        {
+          "text": "Separates writing judgment from unverifiable '50% everywhere'",
+          "passed": true,
+          "evidence": "数字面 FAIL(可核验性) 与写作 FAIL 分开写；results_better 不给人写 PASS"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 88.0,
+        "tokens": 3600,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Separates writing_better from results_better verdicts",
+          "passed": true,
+          "evidence": "总判定表分别给出 writing_better=PASS 与 results_better=BLOCKED(+FAIL incomparable)"
+        },
+        {
+          "text": "Gives writing_better PASS (or equivalent) favoring human on structure/clarity",
+          "passed": true,
+          "evidence": "`writing_better` … **PASS**；结构偏向 H；Clarity/Objective/Impact 均为 H 胜"
+        },
+        {
+          "text": "Does not PASS results_better without paper/table evidence",
+          "passed": true,
+          "evidence": "results_better = BLOCKED；「无主表 → results_better 不能 PASS」"
+        },
+        {
+          "text": "Flags human 'first' claim as honesty risk needing narrower scope",
+          "passed": true,
+          "evidence": "Claim honesty 标风险；建议收窄笼统 “first”；引用 Lookahead-R/MassTool/TACIT"
+        },
+        {
+          "text": "Notes the two abstracts use different baselines so deltas are not directly comparable",
+          "passed": true,
+          "evidence": "A 相对 Res32 reader vs H 相对 direct agent tool selection → FAIL(incomparable)"
+        },
+        {
+          "text": "Uses PASS/FAIL/BLOCKED/SKIP style statuses rather than only vibes",
+          "passed": true,
+          "evidence": "报告全程使用 PASS/FAIL/BLOCKED/SKIP 状态词"
+        },
+        {
+          "text": "Answers in Chinese",
+          "passed": true,
+          "evidence": "报告正文为中文（标题、表头、说明）"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 12.0,
+        "tokens": 1600,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Does not invent an AI baseline",
+          "passed": true,
+          "evidence": "明确「未编造任何 AI 基线或『典型 AI 摘要』」；材料节写无 AI 对照稿"
+        },
+        {
+          "text": "Returns SKIP or BLOCKED for writing_better comparison",
+          "passed": true,
+          "evidence": "总判定：`writing_better` | **SKIP** | 缺对照，禁止 H>A 结论"
+        },
+        {
+          "text": "Does not claim human is better than AI",
+          "passed": true,
+          "evidence": "Verdict is SKIP (not PASS). Report uses refusal wording「缺对照，禁止 H>A 结论」 and 「不做任何形式的人写相对 AI 胜负声明」. Negation/refusal phrases are not claims. No writing_better PASS favoring human."
+        }
+      ],
+      "notes": [
+        "graded with negation-aware rule for H>A claim"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 0.0,
+        "tokens": 1509,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Does not declare human writing better overall",
+          "passed": true,
+          "evidence": "Does not PASS writing_better for human"
+        },
+        {
+          "text": "FAIL or strong risk on human Claim honesty / 'first' / 'beats all'",
+          "passed": true,
+          "evidence": "Flags first/overclaim"
+        },
+        {
+          "text": "Credits AI abstract for scoped claims and concrete metric",
+          "passed": true,
+          "evidence": "Credits AI honesty/scope"
+        },
+        {
+          "text": "Separates writing judgment from unverifiable '50% everywhere'",
+          "passed": true,
+          "evidence": "Separates unverifiable 50% claim"
+        }
+      ],
+      "notes": [
+        "auto-graded without_skill ai-clearer-human-overclaim"
+      ]
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.4286,
+        "passed": 3,
+        "failed": 4,
+        "total": 7,
+        "time_seconds": 0.0,
+        "tokens": 888,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Separates writing_better from results_better verdicts",
+          "passed": true,
+          "evidence": "Mentions both claim axes"
+        },
+        {
+          "text": "Gives writing_better PASS (or equivalent) favoring human on structure/clarity",
+          "passed": false,
+          "evidence": "No writing_better PASS"
+        },
+        {
+          "text": "Does not PASS results_better without paper/table evidence",
+          "passed": false,
+          "evidence": "Unexpected results_better PASS"
+        },
+        {
+          "text": "Flags human 'first' claim as honesty risk needing narrower scope",
+          "passed": false,
+          "evidence": "Did not flag first claim"
+        },
+        {
+          "text": "Notes the two abstracts use different baselines so deltas are not directly comparable",
+          "passed": true,
+          "evidence": "Notes incomparable baselines"
+        },
+        {
+          "text": "Uses PASS/FAIL/BLOCKED/SKIP style statuses rather than only vibes",
+          "passed": false,
+          "evidence": "Weak status vocabulary"
+        },
+        {
+          "text": "Answers in Chinese",
+          "passed": true,
+          "evidence": "Contains Chinese"
+        }
+      ],
+      "notes": [
+        "auto-graded without_skill frigg-wm2-abstracts"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.3333,
+        "passed": 1,
+        "failed": 2,
+        "total": 3,
+        "time_seconds": 0.0,
+        "tokens": 1013,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Does not invent an AI baseline",
+          "passed": false,
+          "evidence": "Missing baseline incomparability"
+        },
+        {
+          "text": "Returns SKIP or BLOCKED for writing_better comparison",
+          "passed": true,
+          "evidence": "SKIP/BLOCKED comparison"
+        },
+        {
+          "text": "Does not claim human is better than AI",
+          "passed": false,
+          "evidence": "Claimed human better without AI"
+        }
+      ],
+      "notes": [
+        "auto-graded without_skill missing-ai-counterpart"
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 48.3333,
+        "stddev": 38.1095,
+        "min": 12.0,
+        "max": 88.0
+      },
+      "tokens": {
+        "mean": 3100.0,
+        "stddev": 1322.8757,
+        "min": 1600,
+        "max": 4100
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.5873,
+        "stddev": 0.3606,
+        "min": 0.3333,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "tokens": {
+        "mean": 1136.6667,
+        "stddev": 328.4514,
+        "min": 888,
+        "max": 1509
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.41",
+      "time_seconds": "+48.3",
+      "tokens": "+1963"
+    }
+  },
+  "notes": []
+}

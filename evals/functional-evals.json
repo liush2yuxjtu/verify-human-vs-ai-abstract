@@ -1,0 +1,46 @@
+{
+  "skill_name": "verify-human-vs-ai-abstract",
+  "evals": [
+    {
+      "id": 1,
+      "name": "frigg-wm2-abstracts",
+      "prompt": "Below are two abstracts for the same work. AI-generated first, then human-written. Verify whether the human-written abstract is better. Answer in Chinese. Separate writing_better vs results_better.\n\nAI:\nTool retrieval for language-model agents must track changing execution requirements, even when the user's goal remains unchanged. We introduce FRIGG, an execution-aware retrieval framework instantiated by WM2, which combines the agent's current hidden state with candidate-conditioned predictions of subsequent state changes. A lightweight transition network predicts a latent displacement for each enabled tool, and a normalized linear projection uses the current information and predicted displacement to score that tool against its semantic representation. Observed successors and a frozen future-aware teacher provide training supervision; inference requires neither a true future state nor an explicitly generated retrieval query. On APIGen-MT-5K, WM2 achieves 92.5449% Top-1 agreement and 0.957328 MRR, improving Top-1 over an existing Res32 reader by 1.1505 percentage points. Independently trained adaptations to a selected τ²-Bench subset, ToolHop, and MCP-Atlas yield small positive point differences over existing linear readers, but do not establish consistent superiority over stronger baselines. Full-test ablations identify the predictive branch, future-informed training, explicit history, and tool conditioning as the more consequential tested choices. A live RTX 3090 measurement takes 717.9 ms per decision at the median, including the actual Qwen3.5-9B forward pass. Separate controlled readout analyses examine execution-stage discrimination and pre-generation accessibility. The results support predictive hidden-state ranking under known tool menus, while leaving open-catalog retrieval and online task success untested.\n\nHUMAN:\nTool retrieval for language-model agents typically relies on user requests or explicitly generated queries to describe tool needs in natural language, even though agents have already processed task goals, execution histories, and environmental feedback. As tool needs evolve across execution stages, such language-mediated retrieval may fail to fully utilize the decision signals encoded in agent hidden states. To address this limitation, we propose FRIGG, the first tool retrieval framework to perform retrieval through latent state transitions grounded in agent hidden states. Inspired by world models, FRIGG predicts the changes in hidden states associated with different candidate tools and combines them with the current hidden state for tool ranking, enabling latent lookahead without executing candidate tools or generating explicit retrieval queries. Experiments on large-scale datasets show that FRIGG improves Top-1 tool selection accuracy by 6.72 percentage points over direct agent tool selection while reducing average selection time by 68.22%. Further analyses show that agent hidden states provide useful retrieval signals before explicit query generation. FRIGG can distinguish tool needs across different internal execution states at the same decision point, even when these states produce identical textual descriptions of tool needs. Our results demonstrate the potential of shifting tool retrieval from the traditional language-mediated paradigm toward an agent-native retrieval paradigm that directly leverages agent hidden states and execution context.",
+      "expected_output": "Chinese report with writing_better PASS favoring human; results_better BLOCKED or FAIL(incomparable); surfaces scored; notes risk on human 'first' claim; does not claim experimental superiority from prose alone.",
+      "files": [],
+      "expectations": [
+        "Separates writing_better from results_better verdicts",
+        "Gives writing_better PASS (or equivalent) favoring human on structure/clarity",
+        "Does not PASS results_better without paper/table evidence",
+        "Flags human 'first' claim as honesty risk needing narrower scope",
+        "Notes the two abstracts use different baselines so deltas are not directly comparable",
+        "Uses PASS/FAIL/BLOCKED/SKIP style statuses rather than only vibes",
+        "Answers in Chinese"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "ai-clearer-human-overclaim",
+      "prompt": "Compare these two short abstracts. Is the human one better?\n\nHUMAN: We present the first neural method for sorting integers. It beats all prior work by 50% everywhere.\n\nAI: Sorting integers is well studied. We propose SortNet, a small Transformer trained on synthetic arrays. On a fixed 1e5-key random benchmark it is 1.2% slower than timsort but uses 30% less peak memory. We do not claim asymptotic novelty over classical algorithms.",
+      "expected_output": "writing_better should FAIL or not favor human because honesty FAIL; AI may win clarity+honesty.",
+      "files": [],
+      "expectations": [
+        "Does not declare human writing better overall",
+        "FAIL or strong risk on human Claim honesty / 'first' / 'beats all'",
+        "Credits AI abstract for scoped claims and concrete metric",
+        "Separates writing judgment from unverifiable '50% everywhere'"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "missing-ai-counterpart",
+      "prompt": "Please verify my abstract is good: We study cats. Experiments show nice results.",
+      "expected_output": "SKIP or BLOCKED for human-vs-AI comparison; ask for AI counterpart or refuse writing_better claim.",
+      "files": [],
+      "expectations": [
+        "Does not invent an AI baseline",
+        "Returns SKIP or BLOCKED for writing_better comparison",
+        "Does not claim human is better than AI"
+      ]
+    }
+  ]
+}

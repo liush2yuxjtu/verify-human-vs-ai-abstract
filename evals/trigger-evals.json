@@ -1,0 +1,162 @@
+{
+  "skill_name": "verify-human-vs-ai-abstract",
+  "split": {
+    "seed": 42,
+    "train_ratio": 0.6,
+    "train_indices": [
+      4,
+      5,
+      6,
+      9,
+      10,
+      12,
+      13,
+      14,
+      15,
+      17,
+      18,
+      19
+    ],
+    "test_indices": [
+      0,
+      1,
+      2,
+      3,
+      7,
+      8,
+      11,
+      16
+    ],
+    "train_queries": [
+      "人写更好吗？两版摘要都在下面，顺便看看 first / SOTA 声明是否诚实。",
+      "Our human abstract claims 'the first neural method' while th",
+      "只有人写摘要、暂时没有 AI 对照。帮我 verify my abstract 好不好——如果缺对照请按人写vs AI流",
+      "学术摘要：人写 vs GPT-4o。核对谁更适合投 ACL，并单独判断实验结果声明是否可核验。",
+      "帮我做一次普通代码 review：这个 Python PR 的类型注解和错误处理写得怎样？",
+      "请用 verify-passkey 流程检查这个 API key 是否端到端传到了 Vercel 环境变量并能真实调用。",
+      "Rewrite my essay for style only — make it punchier and cut A",
+      "把这段英文 abstract 翻译成中文，保持学术语气，不要评价谁更好。",
+      "帮我调 LaTeX 摘要区的格式：两栏、字号、\\abstract 环境报错。",
+      "只要根据实验结果画几张对比表和柱状图，不要改摘要文案。",
+      "帮我写一段会议海报上的一句话 pitch，不要做人写和 AI 摘要对打。",
+      "用 paperradar / daily brief 流程搜今天有没有新论文，跟摘要人写vs AI 无关。"
+    ],
+    "test_queries": [
+      "下面两段是同一篇论文的摘要，上面是 AI 写的，下面是人写的。帮我验证人写的是不是更好？投稿前想确认一下。",
+      "Compare these two abstracts (human vs ChatGPT). Is the human",
+      "投稿前比摘要：人写版写了 first framework，AI 版数字更保守。请按 verify 核对「人写更好吗」，不",
+      "verify writing_better：H1 是人写 abstract，A1 是 Claude 生成的。请打分并判断",
+      "争论同事说 AI 摘要更清楚。请用人写 vs AI abstract 验证流程给 writing_better / re",
+      "Please check honesty of 'first' and 'beats all prior work by",
+      "verify-wasm-game-playability：这个 WebGL 小游戏上线前帮我验证能不能玩、手感合不合理。",
+      "查一下这篇论文有没有抄袭 / plagiarism，跟 Turnitin 类似的重复率检查，不是人写vs AI 摘要对比"
+    ],
+    "train_labels": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "test_labels": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "queries": [
+    {
+      "query": "下面两段是同一篇论文的摘要，上面是 AI 写的，下面是人写的。帮我验证人写的是不是更好？投稿前想确认一下。",
+      "should_trigger": true
+    },
+    {
+      "query": "Compare these two abstracts (human vs ChatGPT). Is the human-written one better for a conference submission? Separate writing quality from claimed results.",
+      "should_trigger": true
+    },
+    {
+      "query": "投稿前比摘要：人写版写了 first framework，AI 版数字更保守。请按 verify 核对「人写更好吗」，不要只凭语感。",
+      "should_trigger": true
+    },
+    {
+      "query": "verify writing_better：H1 是人写 abstract，A1 是 Claude 生成的。请打分并判断谁更适合当会议 abstract。",
+      "should_trigger": true
+    },
+    {
+      "query": "人写更好吗？两版摘要都在下面，顺便看看 first / SOTA 声明是否诚实。",
+      "should_trigger": true
+    },
+    {
+      "query": "Our human abstract claims 'the first neural method' while the AI draft is more scoped. Can you verify whether human writing is actually better before we submit?",
+      "should_trigger": true
+    },
+    {
+      "query": "只有人写摘要、暂时没有 AI 对照。帮我 verify my abstract 好不好——如果缺对照请按人写vs AI流程处理，不要直接说人写更好。",
+      "should_trigger": true
+    },
+    {
+      "query": "争论同事说 AI 摘要更清楚。请用人写 vs AI abstract 验证流程给 writing_better / results_better 判定。",
+      "should_trigger": true
+    },
+    {
+      "query": "Please check honesty of 'first' and 'beats all prior work by 50%' in my human abstract against this AI alternative abstract.",
+      "should_trigger": true
+    },
+    {
+      "query": "学术摘要：人写 vs GPT-4o。核对谁更适合投 ACL，并单独判断实验结果声明是否可核验。",
+      "should_trigger": true
+    },
+    {
+      "query": "帮我做一次普通代码 review：这个 Python PR 的类型注解和错误处理写得怎样？",
+      "should_trigger": false
+    },
+    {
+      "query": "verify-wasm-game-playability：这个 WebGL 小游戏上线前帮我验证能不能玩、手感合不合理。",
+      "should_trigger": false
+    },
+    {
+      "query": "请用 verify-passkey 流程检查这个 API key 是否端到端传到了 Vercel 环境变量并能真实调用。",
+      "should_trigger": false
+    },
+    {
+      "query": "Rewrite my essay for style only — make it punchier and cut AI tells. I don't have an AI counterpart abstract to compare.",
+      "should_trigger": false
+    },
+    {
+      "query": "把这段英文 abstract 翻译成中文，保持学术语气，不要评价谁更好。",
+      "should_trigger": false
+    },
+    {
+      "query": "帮我调 LaTeX 摘要区的格式：两栏、字号、\\abstract 环境报错。",
+      "should_trigger": false
+    },
+    {
+      "query": "查一下这篇论文有没有抄袭 / plagiarism，跟 Turnitin 类似的重复率检查，不是人写vs AI 摘要对比。",
+      "should_trigger": false
+    },
+    {
+      "query": "只要根据实验结果画几张对比表和柱状图，不要改摘要文案。",
+      "should_trigger": false
+    },
+    {
+      "query": "帮我写一段会议海报上的一句话 pitch，不要做人写和 AI 摘要对打。",
+      "should_trigger": false
+    },
+    {
+      "query": "用 paperradar / daily brief 流程搜今天有没有新论文，跟摘要人写vs AI 无关。",
+      "should_trigger": false
+    }
+  ],
+  "notes": "20 realistic queries (10 should_trigger, 10 near-miss). Fixed seed 42, 60/40 train/test. Judge from name+description only."
+}
