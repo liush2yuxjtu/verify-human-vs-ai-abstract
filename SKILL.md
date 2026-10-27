@@ -1,129 +1,160 @@
 ---
 name: verify-human-vs-ai-abstract
 description: >-
-  验证人写学术摘要/论文 abstract 是否比 AI 生成版更好（writing_better / results_better）。在以下情况使用：用户给出人写与 AI
-  两版摘要并问谁更好、「人写更好吗」、投稿前比摘要、核对 first/SOTA/巨大提升是否诚实、或争论谁更适合会议 abstract；即使用户暂时只有一篇、缺
-  AI/人写对照但仍按人写 vs AI 流程来 verify abstract，也加载本 skill（对 writing_better 给
-  SKIP/BLOCKED，禁止宣称人写更好）。不要用于：普通代码 review、wasm/游戏可玩性、passkey/密钥核验、纯文风润色（无 AI
-  对照摘要）、翻译摘要、LaTeX 排版、查重/plagiarism、只画实验表图、海报 pitch、论文雷达/日报检索。按 claim→surface→evidence 出
-  PASS/FAIL/BLOCKED/SKIP；默认中文报告。
+  给学术摘要/会议 abstract 打分或对已有摘要做 hillclimb（可人写 vs
+  AI、也可甲/乙/多稿、也可单篇迭代）。默认主轴是读者兴趣、贡献论证与 story 是否讲清（hook / problem–gap–hook / why
+  it matters）；真实性与实验细节由正文表保证，无表时 results 标 BLOCKED
+  但不自动否定写作胜出。也用于：投稿前比摘要、盲评谁更抓人、改稿前后对照打分、核对 first/SOTA 风险（诚实面单独记，不盖过
+  story）。不要用于：普通代码 review、wasm/游戏可玩性、passkey、纯文风润色（无摘要任务）、翻译、LaTeX、查重、只画实验表、海报
+  pitch、论文雷达。按 claim→surface→evidence 出 PASS/FAIL/BLOCKED/SKIP；默认中文报告。
 ---
-# 验证人写 vs AI 学术摘要
+# 学术摘要评分与 hillclimb
 
 写法对齐 [dot-pi](https://github.com/liush2yuxjtu/dot-pi) `agent/skills/verify`：**先有证据再下结论**，每个面一个硬判定，不许部分通过，不许为了绿灯削弱检查。
+
+公开仓模板：[liush2yuxjtu/verify-human-vs-ai-abstract](https://github.com/liush2yuxjtu/verify-human-vs-ai-abstract)。
+
+## 评分哲学（主轴）
+
+**摘要的主任务是引起阅读兴趣、讲清 story、论证贡献；实验真实性与完整局限由正文（表/附录）保证。**
+
+- **主轴（写作胜出）**：兴趣 / hook、problem–gap–hook、贡献是否可带走、story 是否连贯。细节堆砌、过度降调备忘录式写法，即使「更诚实」也不自动赢。
+- **辅轴（风险便签，不单独定写作胜负）**：无限定 “first/SOTA”、空喊大数字却不点数据集/基线名 → 记风险与改稿建议；**不得**仅因 Claim honesty 更高就判另一篇写作失败。
+- **实验轴**：有正文表才谈 `results_better`；无表 → `results_*` = **BLOCKED**，并写明「真实性交正文，本轮只评摘要叙事」。
+
+依据与延伸阅读（评分时按需引用，不必全文复述）：
+
+- [Nature NSMB: Scientific writing 101](https://www.nature.com/articles/nsmb0210-139) — abstract 抓 big picture、别 bogged down in details、entice 往下读
+- [How to … write an abstract (Clinical Teacher)](https://ora.ox.ac.uk/objects/uuid:be59ebfd-cc0c-49af-9955-cc800da4c756/files/rzk51vh96f) — story not study；problem–gap–hook；摘要是促销文档
+- [Story, Not Study（AACE / Lingard 系材料）](https://www.aaceonline.com/common/Uploaded%20files/AACE_Files/ICEC2025/StoryNotStudyArticle.pdf) — 摘要既 summarize 又 persuade；突出 novelty
+- [Let Me Speak! Meeting abstract（PMC）](https://pmc.ncbi.nlm.nih.gov/articles/PMC6294637/) — 叙事引导审稿人；要有料但不能淹没创新点
+- [How to write a good abstract…（PMC）](https://pmc.ncbi.nlm.nih.gov/articles/PMC3136027/) — Results 要有具体发现；结论勿 claim 超过数据
+- [How research abstracts succeed and fail（OUP Blog）](https://blog.oup.com/2021/11/how-research-abstracts-succeed-and-fail/) — 兴趣与关键假设/范围的平衡；勿 misleading
+- [How to write an honest but effective abstract](https://www.sciencedirect.com/science/article/pii/S2468227619307318) — 减 spin，但仍要有效传达贡献
+- [Writing an abstract（ANU）](https://www.anu.edu.au/students/academic-skills/research-writing/journal-article-writing/writing-an-abstract) — 独立摘要，帮读者决定是否深读
+- [How to write a successful conference abstract（Scenario）](https://doi.org/10.4081/scenario.2025.628) — 避免过空或过载次要细节
+
+默认用**中文**写报告；用户用其他语言提问时跟随用户。
 
 ## 铁律
 
 ```
-没有对本轮两篇摘要做打分证据，不许说「人写更好」
+没有对本轮候选摘要做打分证据，不许说「谁更好」
 没有表格 / 论文 / 可复核来源，不许说「实验也更好」
+无表时不得用「更诚实」单独否掉 story 更强的稿
 ```
 
-本轮若未按下面各面对 H/A 打分，就不能说人写更好。语感、「读起来顺」、作者偏好都不算证据。
+语感、作者身份（谁人手写 / 谁 AI）都不算证据。用户要求盲评时，一律称 **甲/乙/丙**（或 Draft-1/Draft-2），禁止在报告里写人写/AI 标签。
 
-**写作质量与实验优势是不同主张。** 人写可以写作 PASS，同时实验数字仍是 BLOCKED 或 FAIL。
+**`story_better`（或 `writing_better`）与 `results_better` 永远分开。**
 
-默认用**中文**写验证报告；用户用其他语言提问时跟随用户。
+## 意图与模式
 
-## 意图
+本 skill 支持三种用法（自动识别）：
 
-判断**人写学术摘要**相对**AI 生成摘要**，在会议/期刊投稿写作质量上是否更好；并单独判断任何「结果也更好」的说法是否已被核实。
+| 模式 | 何时 | 产出 |
+|---|---|---|
+| **对比打分** | ≥2 篇摘要（人写 vs AI，或任意甲/乙） | 总判定谁 story 更强；可选 results |
+| **单篇评分** | 只有一篇 | 五步+量表+风险便签+改稿清单；**禁止**编造对照稿宣布「优于 AI」 |
+| **Hillclimb** | 用户要改摘要 / 迭代 / 「下一版更好吗」 | 冻结基线稿 → 打分 → 最小修改 → 对新稿重打 → 对照表（必须分数/面状态相对基线变化） |
 
 ## 何时启用
 
-出现以下任一情况就加载（即使没说「verify」）：
+- 比两版摘要谁更好 / 谁更抓人 / 谁 story 更清楚
+- 投稿前打磨、改稿前后对照、hillclimb 摘要
+- 单篇「给这篇 abstract 打分」
+- 盲评（隐去人写/AI 来源）
+- 核对 first/SOTA 风险（记辅轴，不单独定写作胜负）
 
-- 用户贴出人写 + AI 两版摘要，问谁更好 / 人写是否更好
-- 投稿前拿 AI 稿对照打磨摘要
-- 争论 “first”、巨大提升、或人写稿是否能投
-
-仅有一篇摘要、无 AI 对照时：走「缺 AI / 人写对照」；`writing_better`=`SKIP`/`BLOCKED`，**绝不**说人写比 AI 更好（即使用户问「好不好」）。
+不要默认启用：纯代码 review、游戏可玩性、passkey、无摘要任务的润色、翻译、排版、查重、雷达检索。
 
 ## 主张与候选
 
-先写清主张，例如：「会议摘要写作上，人写 H1 优于 AI 稿 A1。」
+先写清主张，例如：
 
-冻结候选：
+- 「会议摘要 **story/贡献论证** 上，乙优于甲。」
+- 「Draft-2 相对 Draft-1 的 hillclimb：story 面是否提升。」
 
-- **H** — 人写正文（粘贴或路径 + 哈希/mtime）
-- **A** — AI 正文（粘贴或路径 + 哈希/mtime）
-- 可选 **论文/表/仓库** — 用于数字核对
+冻结候选（路径或全文 + 哈希/mtime；打分中不偷偷改写）：
 
-若 H 与 A 报告的基线或指标不同，先记下来，再谈「实验结果更好」。
+- **候选集** — 甲/乙/… 或 H/A 或 Draft-n
+- 可选 **论文/表/仓库** — 仅用于 `results_*`
+
+基线或指标不同时先记下，再谈实验谁更好。
 
 ## 面（Surface）对照表
 
 | 主张轴 | 核对面 | 必需证据 |
 |---|---|---|
-| 写作结构 | 两篇对照五步模板 | H/A 每步有/弱/无（[references/five-move.md](references/five-move.md)） |
-| 写作量表 | 两篇 1–5 打分 | 每维分数 + 一句理由（[references/rubric.md](references/rubric.md)） |
-| 声明诚实 / 新颖性风险 | H/A 中的绝对声明（“first”“SOTA”、夸张提升） | 本轮 Web/arXiv 相关工作；搜不到则该面 BLOCKED |
-| 数字可核验 | H/A 每个定量说法 | 对上论文表 / 仓库日志 / 公开网页；否则 FAIL/BLOCKED |
-| 指标可比性 | 每个 delta 的基线+指标+数据集 | 对比设定相同，否则 FAIL(不可比) |
-| 可选：实验优势 | 同一协议下的同一批表 | 并排数字；禁止只凭文案推断 |
+| Story / 兴趣（**主轴**） | Hook、缺口具体度、贡献可带走、读完是否想点开正文 | 逐句证据 + [references/five-move.md](references/five-move.md) 第1/2/5步偏强 |
+| 写作结构 | 五步模板 | 每步有/弱/无 |
+| 写作量表 | 1–5 | Clarity / Objective / **Story pull** / Results punch / Impact / Claim honesty（见 rubric） |
+| 声明风险（**辅轴**） | first/SOTA/空喊提升 | Web/arXiv；记风险，默认不否决 story 胜出 |
+| 数字锚点（辅） | 是否点名数据集/基线/指标 | 有锚点加分；无锚点大数字 → 风险便签 |
+| 数字可核验（实验轴） | 每个定量说法 | 对上正文表；无表 → BLOCKED |
+| 指标可比 | delta 的基线+指标+数据 | 设定相同否则 FAIL(不可比) |
 
 ## 步骤（按序）
 
-1. **重述主张** — 拆成 `writing_better` 与（若宣称）`results_better`。
-2. **冻结候选** — 引用或路径固定两篇正文；打分时不偷偷改写。
-3. **结构面** — 按五步给 H/A 打分（背景/缺口 → 本文动作 → 方法 → 结果 → 启示）。见 [references/five-move.md](references/five-move.md)。
-4. **量表面** — Clarity / Objective / Results punch / Impact / Claim honesty（1–5）。写作胜出要求：H 在 Clarity+Objective+Impact 上领先，且 H 的 Claim honesty 未因误导性绝对声明而 FAIL。
-5. **诚实/新颖性面** — 搜独特表述、方法名、“first …”。与 “first” 重叠的相关工作 → 标风险；无范围限定且有明确先验 → 该稿此面 FAIL。
-6. **数字面** — 列出每个数字/delta；先论文表后网页。无来源的独特数字 → 该稿实验声明 FAIL(可核验性)，不自动否定写作。
-7. **可比性面** — H/A 基线不同则 `results_better` 不能 PASS。
-8. **边角探针** — 任选一项：字数、未定义缩写堆砌、或结果埋在末句。
-9. **判定** — 每面一个状态，再套总规则。
+1. **识别模式** — 对比 / 单篇 / hillclimb。
+2. **重述主张** — `story_better`（可与用户说的 `writing_better` 互换）与可选 `results_better`。
+3. **冻结候选** — 盲评时打乱标签为甲/乙，且不在报告中还原身份（除非用户事后要求对照表）。
+4. **Story/结构面** — 五步；额外标 hook 强度与贡献句是否可引用带走。
+5. **量表面** — 见 [references/rubric.md](references/rubric.md)。**主胜出维：Story pull + Objective + Impact**（并列时看 Clarity，再看 Results punch 是否服务叙事而非堆账本）。
+6. **风险辅轴** — first/SOTA/无锚点大数字 → 风险等级 Low/Med/High + 改法；**High 也不自动否决 story PASS**，除非用户显式要求「诚实优先」模式。
+7. **数字/可比（仅 results）** — 无表一律 BLOCKED。
+8. **Hillclimb 专用** — 列出相对基线：哪些面 ↑/↓/＝；禁止无对照分就说「改好了」。
+9. **判定** — 每面一状态，再套总规则。
 
-禁止删面、削弱面或跳面来刷绿。网页搜索不可用时，诚实/联网数字面标 **BLOCKED**，不得标 PASS。
+禁止删面刷绿。用户声明「真实性由正文保证 / 只评兴趣与 story」时：诚实面仍记录，但总判定以 story 主轴为准（诚实优先模式需用户明说才切换）。
 
 ## 状态
 
-每个面恰好一个状态——不许部分通过：
-
-- **PASS** — 证据支持该面上的主张
-- **FAIL** — 证据反对，或结构/诚实性被破坏
-- **BLOCKED** — 到不了所需证据面（无表、搜不到、缺 AI/人写稿）
-- **SKIP** — 本次询问不在范围内（例如只要写作、不要实验）
+- **PASS** / **FAIL** / **BLOCKED** / **SKIP** — 每面恰好一个；不许部分通过。
 
 ## 总判定规则
 
-### `writing_better`（人写写作更好）
+### `story_better` / `writing_better`（默认 = 兴趣与贡献叙事）
 
-- **PASS**：结构偏 H，量表 Clarity+Objective+Impact 偏 H，且 H 的 Claim honesty 不是 FAIL。
-- **FAIL**：A 赢下这些写作面，或 H 只靠虚假绝对声明显得更清楚。
-- **BLOCKED**：缺任一篇正文，或无法打量表。
+- **PASS（候选 X）**：Story pull + Objective + Impact 偏 X；结构上贡献/缺口更清楚；读者更可能想读正文。
+- **FAIL（相对主张）**：对照稿在这些主维上明显更强。
+- **BLOCKED**：缺候选正文或无法打量表。
+- Claim honesty **单独成行**；默认不因辅轴 High 而翻转主轴，除非用户要「诚实优先」。
 
-### `results_better`（人写报告的实验更好）
+### `results_better`
 
-- **PASS**：所引 delta 数字可核验 PASS，且指标可比 PASS，且核实后的数字支持人写所宣称的设定。
-- **FAIL**：与表格冲突，或实际不可比却文案暗示全面更优。
-- **BLOCKED**：无表/论文/网页来源（未发表草稿常见）。
-- 用户只问摘要「人写更好」时：评 `writing_better`；除非同时宣称实验更优，否则 `results_better` 为 **SKIP**。
+- **PASS**：表可核验 + 可比 + 数字支持宣称。
+- **FAIL**：与表冲突，或不可比却暗示全面更优。
+- **BLOCKED**：无表/论文（摘要场景默认常见）。
+- 用户只问谁更抓人 / story：`results_better` = **SKIP** 或注明「交正文」。
+
+### Hillclimb
+
+- 新稿相对基线：主轴至少一维明确 ↑ 且无主维崩盘 → 可报「迭代成功」。
+- 仅减风险、story 不变 → 报「风险改善、吸引力持平」，勿夸成大胜。
 
 两主张永不可合成一个绿灯。
 
+## 单篇 / 缺对照
 
-## 缺 AI / 人写对照（强制）
-
-若用户**只给一篇**摘要、没有 H 与 A 两份正文，或明确缺对照稿：
-
-1. **禁止**给出任何形式的「人写优于 AI / 人写更好 / human better than AI」结论（包括委婉的「这篇可以」「质量不错所以更好」）。
-2. `writing_better` 必须是 **SKIP**（询问范围是人写 vs AI 对比）或 **BLOCKED**（缺对照导致无法打分）——二者择一写进总判定表，**不得**写 PASS/FAIL。
-3. **禁止编造** AI 基线或「典型 AI 摘要」来凑对比。
-4. 报告总判定表第一行必须类似：`writing_better | SKIP 或 BLOCKED | 缺对照，不做 H>A 结论`。
-5. 可附**单篇**结构/诚实性点评，但必须单独标明「单篇点评 ≠ 人写 vs AI 胜负」；单篇 FAIL（例如无数字）**不得**解读为人写赢了 AI。
-6. 结尾只要求用户补 AI 稿或改做「单篇五步点评（非对比）」，不要替用户宣布胜负。
-
-触发词示例：「帮我看看摘要好不好」「verify my abstract」且正文只有一段时，一律走本节，不要默认当成已有 AI 对照。
+1. 禁止编造 AI/人写基线宣布胜负。
+2. 可出完整单篇评分 + 改稿清单（供 hillclimb）。
+3. 若用户问的是「人写是否优于 AI」但只有一篇：`story_better` 对 H>A 主张 = **SKIP/BLOCKED**，并说明缺对照。
 
 ## 报告
 
-先给总判定（`writing_better`、`results_better`）。再每面一行：状态 + 证据（引文、分数、URL、表引用）。最后给落败或风险稿的最小修改清单（如收窄 “first”、并入 AI 的局限句、补基准名）。
+1. 模式 + 主张 + 冻结候选（盲评用甲/乙）。
+2. 总判定表：`story_better` / `results_better`（及 hillclimb 相对基线）。
+3. 各面状态 + 证据句/分数。
+4. 风险便签（first、无锚点数字等）。
+5. **最小修改清单**（服务下一轮 hillclimb：先补 hook/贡献句，再补数据集·基线名，最后才收窄 first）。
+6. 需要时附「乙的叙事骨架 + 甲的锚点」类合成建议。
 
-先保留原始打分再解释。报告语言跟随用户（默认中文）。
+先保留原始打分再解释。
 
 ## 参考
 
 - [references/five-move.md](references/five-move.md) — 五步摘要清单
-- [references/rubric.md](references/rubric.md) — 1–5 量表卡
+- [references/rubric.md](references/rubric.md) — 1–5 量表（含 Story pull）
+- 上文「评分哲学」中的公开链接
 - 规范来源：dot-pi `agent/skills/verify/SKILL.md`
